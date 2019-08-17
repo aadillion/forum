@@ -2,11 +2,13 @@ import graphene
 import asyncio
 from graphql.execution.executors.asyncio import AsyncioExecutor
 from aiohttp_graphql import GraphQLView
-from api.schema import Query
+from api.queries import Query
+from api.mutations import Mutation
 
 
 schema = graphene.Schema(
-    query=Query
+    query=Query,
+    mutation=Mutation
 )
 
 gqil_view = GraphQLView(

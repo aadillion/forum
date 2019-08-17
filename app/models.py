@@ -2,6 +2,7 @@ from .tables import section, post, comment
 from aiopg.sa.result import RowProxy
 from aiopg.sa import SAConnection as SAConn
 from sqlalchemy.sql import literal_column
+from datetime import datetime
 
 
 class Model(object):
@@ -56,25 +57,57 @@ class Model(object):
 class Section(Model):
     table = section
 
+    def __init__(self, theme, description):
+        self.theme = theme
+        self.description = description
+
+    async def save(self, conn: SAConn):
+        await conn.execute(self.table.update().values({self.table.c.theme:self.theme}).where(self.table.c.id == 1))
+
 
 class Post(Model):
     table = post
+
+    def __init__(self, theme, description, section_id):
+        self.theme = theme
+        self.description = description
+        self.section_id = section_id
+
+    async def save(self, conn: SAConn):
+        time = datetime.now()
+        await conn.execute(self.table.insert().values(theme=self.theme,
+                                                      description=self.description,
+                                                      created_at=time,
+                                                      modified_at=time))
+        return True
 
 
 class Comment(Model):
     table = comment
 
-    @classmethod
-    async def select_all_by_post(cls, conn, post_id):
-        all_comments = await cls.select_filter_by(conn, {'post_id': post_id})
-        main_parents = []
-        for i in all_comments:
-            pass
-        # cursor = await co-nn.execute(
-        #     cls.table.select().where(literal_column(key) == col[key])
-        # )
-        # items = await cursor.fetchall()
-        return 'hello'
+    def __init__(self, theme, ):
+        self.text = theme
+
+
+    async def save(self, conn: SAConn):
+        time = datetime.now()
+        await conn.execute(self.table.insert().values(theme=self.theme,
+                                                      description=self.description,
+                                                      created_at=time,
+                                                      modified_at=time))
+        return True
+
+    # @classmethod
+    # async def select_all_by_post(cls, conn, post_id):
+    #     all_comments = await cls.select_filter_by(conn, {'post_id': post_id})
+    #     main_parents = []
+    #     for i in all_comments:
+    #         pass
+    #     # cursor = await co-nn.execute(
+    #     #     cls.table.select().where(literal_column(key) == col[key])
+    #     # )
+    #     # items = await cursor.fetchall()
+    #     return 'hello'
 
 
 

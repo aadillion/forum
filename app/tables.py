@@ -1,4 +1,5 @@
 import sqlalchemy as sa
+from datetime import datetime
 
 
 metadata = sa.MetaData()
@@ -8,8 +9,8 @@ section = sa.Table(
     sa.Column('id', sa.Integer, primary_key=True, index=True),
     sa.Column('theme', sa.String(20), nullable=False),
     sa.Column('description', sa.String(200), nullable=False),
-    sa.Column('modified_at', sa.DateTime, nullable=False),
-    sa.Column('created_at', sa.DateTime, nullable=False),
+    sa.Column('modified_at', sa.DateTime, onupdate=datetime.now()),
+    sa.Column('created_at', sa.DateTime, default=datetime.now()),
 )
 
 post = sa.Table(
