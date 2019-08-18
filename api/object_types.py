@@ -32,13 +32,38 @@ class SectionPaginationType(graphene.ObjectType):
 
     async def resolve_total_pages(self, info):
         app = info.context['request'].app
+        search = self['search']
         async with app['db'].acquire() as conn:
-            total_number = await Section.count(conn, {})
+            total_number = await Section.count(conn, {}, search)
+        if total_number < self['number']:
+            return 1
         return total_number / self['number']
 
     async def resolve_sections(self, info):
         app = info.context['request'].app
         offset = self['page'] * self['number'] - self['number']
         limit = self['number']
+        search = self['search']
         async with app['db'].acquire() as conn:
-            return await Section.select_with_limit_and_offset(conn, {}, limit, offset)
+            return await Section.select_with_limit_and_offset(conn, {}, limit, offset, search)
+
+
+class PostPaginationType(graphene.ObjectType):
+    total_pages = graphene.Int()
+    posts = graphene.List(PostType)
+
+    async def resolve_total_pages(self, info):
+        app = info.context['request'].app
+        section_id = self['section_id']
+        async with app['db'].acquire() as conn:
+            total_number = await Post.count(conn, {'section_id': section_id})
+        return total_number / self['number']
+
+    async def resolve_posts(self, info):
+        app = info.context['request'].app
+        offset = self['page'] * self['number'] - self['number']
+        limit = self['number']
+        section_id = self['section_id']
+        async with app['db'].acquire() as conn:
+            return await Post.select_with_limit_and_offset(conn,
+                                                           {'section_id': section_id}, limit, offset)
