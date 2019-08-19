@@ -6,7 +6,7 @@ class PostType(graphene.ObjectType):
     id = graphene.ID()
     theme = graphene.String()
     description = graphene.String()
-    comments = graphene.Field(graphene.String, post_id=graphene.Int())
+    comments = graphene.Field(graphene.JSONString, post_id=graphene.Int())
 
     async def resolve_comments(self, info):
         app = info.context['request'].app

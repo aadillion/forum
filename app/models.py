@@ -2,7 +2,8 @@ from .tables import section, post, comment
 from aiopg.sa.result import RowProxy
 from aiopg.sa import SAConnection as SAConn
 from sqlalchemy.sql import literal_column
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
+import json
 
 
 class Model(object):
@@ -118,31 +119,36 @@ class Comment(Model):
         self.parent_id = parent_id
 
     @classmethod
-    async def select_all_by_post(cls, conn, post_id):
+    async def select_all_by_post(cls, conn: SAConn, post_id: int) -> json:
         all_comments = await cls.select_filter_by(conn, {'post_id': post_id})
         return cls.get_comments_tree(all_comments)
 
     @staticmethod
     def get_comments_tree(comments):
-        comments_dict = defaultdict(list)
-        for i in comments:
-            comments_dict[i.parent_id].append(i.id)
-
-        for id_ in comments_dict[None]:
+        grouped_comments = Comment.group_comments_by_parent(comments)
+        whole_tree = {}
+        for i in grouped_comments[None]:
             tree = {}
-            print(Comment.get_childs(comments_dict, id_, tree))
+            whole_tree[i.id] = (i.text, i.created_at.timestamp(),
+                                Comment.get_childs(grouped_comments, i.id, tree))
 
-        return 'Hello'
+        return json.dumps(whole_tree, default=str)
+
+    @staticmethod
+    def group_comments_by_parent(comments):
+        grouped = defaultdict(list)
+        for i in comments:
+            grouped[i.parent_id].append(i)
+        return grouped
 
     @staticmethod
     def get_childs(comments_dict, id_, tree):
         list_ = comments_dict.get(id_, '')
         if not list_:
-            return ''
+            return {}
         z = {}
         for i in list_:
-            z = {**z, **{i: Comment.get_childs(comments_dict, i, tree)}}
+            z = {**z, **{i.id: (i.text, i.created_at.timestamp(),
+                                Comment.get_childs(comments_dict, i.id, tree))}}
         return z
-
-
 

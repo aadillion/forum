@@ -106,6 +106,19 @@ class CreateComment(graphene.Mutation):
             return CreateComment(ok=await comment.save(conn))
 
 
+class DeleteComment(graphene.Mutation):
+    ok = graphene.Boolean()
+
+    class Arguments:
+        id_ = graphene.ID()
+
+    async def mutate(self, info: ResolveInfo, id_: int) -> (lambda: DeleteComment):
+        app = info.context['request'].app
+        async with app['db'].acquire() as conn:
+            await Comment.delete(conn, {'id': id_})
+            return DeleteComment(ok=True)
+
+
 class Mutation(graphene.ObjectType):
     create_section = CreateSection.Field()
     change_section = ChangeSection.Field()
@@ -116,3 +129,4 @@ class Mutation(graphene.ObjectType):
     delete_post = DeletePost.Field()
 
     create_comment = CreateComment.Field()
+    delete_comment = DeleteComment.Field()
