@@ -6,7 +6,12 @@ from trafaret_config import commandline
 
 
 BASE_DIR = pathlib.Path(__file__).parent.parent
-DEFAULT_CONFIG_PATH = os.path.join(BASE_DIR, 'config', 'info.yaml')
+
+try:
+    DEFAULT_CONFIG_PATH = os.path.join(BASE_DIR, 'config', 'local_conf.yaml')
+except FileNotFoundError:
+    DEFAULT_CONFIG_PATH = os.path.join(BASE_DIR, 'config', 'conf.yaml')
+
 
 TRAFARET = T.Dict({
     T.Key('postgres'):
