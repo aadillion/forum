@@ -1,5 +1,5 @@
-import sqlalchemy as sa
 from datetime import datetime
+import sqlalchemy as sa
 
 
 metadata = sa.MetaData()

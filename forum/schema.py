@@ -17,3 +17,10 @@ gqil_view = GraphQLView(
     graphiql=True,
     enable_async=True,
 )
+
+gql_view = GraphQLView(
+    schema=schema,
+    executor=AsyncioExecutor(loop=asyncio.get_event_loop()),
+    graphiql=False,
+    enable_async=True,
+)

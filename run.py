@@ -52,4 +52,3 @@ def init_app() -> web.Application:
 
 
 web.run_app(init_app(), host='0.0.0.0', port=8080)
-
